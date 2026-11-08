@@ -27,7 +27,7 @@ py -3 --version
 
 下载 [v1.1.0 Windows 安装包](https://github.com/qiukefan/word-equation-illustrator/releases/download/v1.1.0/WordEquationIllustrator-1.1.0-windows.zip)，在文件资源管理器中右键选择“全部解压缩”。不要直接从 ZIP 预览窗口运行安装器。
 
-[GitHub Releases](https://github.com/qiukefan/word-equation-illustrator/releases) 按版本保留安装包；新版本请查看 [最新发布](https://github.com/qiukefan/word-equation-illustrator/releases/latest)。通用安装包 `Word公式转LaTeX-Illustrator-1.1.0.zip` 同样可用于 Windows。
+[GitHub Releases](https://github.com/qiukefan/word-equation-illustrator/releases) 按版本保留安装包；新版本请查看 [最新发布](https://github.com/qiukefan/word-equation-illustrator/releases/latest)。通用安装包 `WordEquationIllustrator-1.1.0-universal.zip` 同样可用于 Windows。
 
 解压后，`Install.cmd`、`安装到Illustrator.cmd`、`install.py` 与 `local.word-equation.illustrator` 文件夹应位于同一目录。
 

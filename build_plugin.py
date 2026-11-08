@@ -48,7 +48,7 @@ def main():
               'docs/VALIDATION-1.1.0.md',
               'licenses/KATEX-LICENSE.txt', 'licenses/MATHJAX-LICENSE.txt', 'licenses/FFLATE-LICENSE.txt']
     distributions = {
-        'Word公式转LaTeX-Illustrator-' + version + '.zip': mac_launchers + windows_launchers,
+        'WordEquationIllustrator-' + version + '-universal.zip': mac_launchers + windows_launchers,
         'WordEquationIllustrator-' + version + '-windows.zip': windows_launchers,
         'WordEquationIllustrator-' + version + '-macos.zip': mac_launchers,
     }

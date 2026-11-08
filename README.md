@@ -81,7 +81,7 @@ Windows 可运行 `py -3 build_plugin.py`；未安装 Python 启动器时，使�
 - `build/local.word-equation.illustrator/`：CEP 面板文件及 SHA-256 清单。
 - `releases/WordEquationIllustrator-1.1.0-windows.zip`：Windows 安装包。
 - `releases/WordEquationIllustrator-1.1.0-macos.zip`：macOS 安装包。
-- `releases/Word公式转LaTeX-Illustrator-1.1.0.zip`：包含两种系统安装入口的通用安装包。
+- `releases/WordEquationIllustrator-1.1.0-universal.zip`：包含两种系统安装入口的通用安装包。
 
 `src/` 保存 Illustrator 面板适配代码、ExtendScript 插入代码和扩展清单。`upstream/Word公式转LaTeX.html` 是独立 HTML 应用的固定快照，内含转换器、排版引擎和字体，因此本仓库可以单独离线构建。更新转换器时，用 [独立 HTML 项目](https://github.com/qiukefan/word-equation-latex) 构建的新文件替换此快照，再运行构建命令。
 
@@ -192,7 +192,7 @@ Outputs:
 - `build/local.word-equation.illustrator/`: CEP panel files and a SHA-256 manifest.
 - `releases/WordEquationIllustrator-1.1.0-windows.zip`: Windows installation package.
 - `releases/WordEquationIllustrator-1.1.0-macos.zip`: macOS installation package.
-- `releases/Word公式转LaTeX-Illustrator-1.1.0.zip`: universal package with launchers for both systems.
+- `releases/WordEquationIllustrator-1.1.0-universal.zip`: universal package with launchers for both systems.
 
 `src/` contains the Illustrator panel adapter, ExtendScript insertion code, and extension manifest. `upstream/Word公式转LaTeX.html` is a fixed snapshot of the standalone HTML application, including its converter, typesetting engines, and fonts, so this repository builds independently and offline. To update the converter, replace this snapshot with a newly built file from the [standalone HTML project](https://github.com/qiukefan/word-equation-latex), then run the build command again.
 

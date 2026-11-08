@@ -19,7 +19,7 @@ Inserted equations are vector paths, so they do not require installed fonts. The
 
 Installation and source builds require Python 3.9 or later; running the extension does not. Windows launchers try `py -3`, then `python`, and check the version. macOS launchers use `/usr/bin/python3`.
 
-1. Get the package for your system from [GitHub Releases](https://github.com/qiukefan/word-equation-illustrator/releases/latest): `WordEquationIllustrator-1.1.0-windows.zip` or `WordEquationIllustrator-1.1.0-macos.zip`. The universal `Word公式转LaTeX-Illustrator-1.1.0.zip` includes both systems. Fully extract the package; do not run the installer inside the ZIP preview.
+1. Get the package for your system from [GitHub Releases](https://github.com/qiukefan/word-equation-illustrator/releases/latest): `WordEquationIllustrator-1.1.0-windows.zip` or `WordEquationIllustrator-1.1.0-macos.zip`. The universal `WordEquationIllustrator-1.1.0-universal.zip` includes both systems. Fully extract the package; do not run the installer inside the ZIP preview.
 2. **Windows:** double-click `Install.cmd` for English prompts, or `安装到Illustrator.cmd` for Chinese. **macOS:** use `Install.command` or `安装到Illustrator.command`.
 3. Adobe does not load unsigned CEP extensions by default. If needed, the installer explains the CEP 12 `PlayerDebugMode = 1` preference and requires you to type `ENABLE` before continuing. Press Return to cancel without changing settings or installation files. This preference allows **all CEP 12 hosts for the current user** to load unsigned extensions.
 4. Save your work, then close and reopen Illustrator yourself.

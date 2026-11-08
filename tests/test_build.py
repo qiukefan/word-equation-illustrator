@@ -25,7 +25,7 @@ class BuildTests(unittest.TestCase):
         cls.addClassCleanup(cls.temporary.cleanup)
         cls.version = ET.parse(REPOSITORY / 'src/manifest.xml').getroot().attrib['ExtensionBundleVersion']
         cls.archives = {
-            'universal': 'Word公式转LaTeX-Illustrator-' + cls.version + '.zip',
+            'universal': 'WordEquationIllustrator-' + cls.version + '-universal.zip',
             'windows': 'WordEquationIllustrator-' + cls.version + '-windows.zip',
             'macos': 'WordEquationIllustrator-' + cls.version + '-macos.zip',
         }
