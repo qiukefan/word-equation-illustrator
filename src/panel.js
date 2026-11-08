@@ -6,19 +6,93 @@
   'use strict';
   const $ = (id) => document.getElementById(id);
   if (!$('previewCard') || $('insertIllustratorButton')) return;
+  if (root.WordI18n) root.WordI18n.register({
+    "插入当前画板": "Insert into artboard",
+    "正在插入…": "Inserting…",
+    "刷新文档": "Refresh document",
+    "检查当前 Illustrator 文档": "Check the active Illustrator document",
+    "正在连接 Illustrator…": "Connecting to Illustrator…",
+    "插入为可编辑的矢量路径 · 使用所选字体、字号和颜色": "Insert as editable vector paths · Uses the selected font, size, and color",
+    "公式转写 · Illustrator": "Word → LaTeX · Illustrator",
+    "完全离线": "Fully offline",
+    "Word 文档与公式只在本机处理，不会上传。": "Word documents and equations are processed locally and never uploaded.",
+    "用于预览、导出与插入 · 缩放仅用于查看": "Applies to preview, export, and insertion · Zoom is for viewing only",
+    "长公式可横向滚动": "Scroll horizontally for long equations",
+    "请在 Illustrator 的扩展面板中使用插入功能。": "Use the extension panel in Illustrator to insert equations.",
+    "Illustrator 暂未响应。请关闭弹出的对话框后重试。": "Illustrator is not responding. Close any open dialog and try again.",
+    "Illustrator 连接未就绪，请关闭并重新打开此面板。": "The Illustrator connection is not ready. Close and reopen this panel.",
+    "Illustrator 无法完成此操作。": "Illustrator could not complete this operation.",
+    "当前文档：{name} · 画板 {number}": "Document: {name} · Artboard {number}",
+    "未命名": "Untitled",
+    "请先在 Illustrator 中新建或打开文档，再插入公式。": "Create or open a document in Illustrator before inserting an equation.",
+    "正在本机生成矢量公式…": "Generating vector paths locally…",
+    "正在插入当前画板…": "Inserting into the active artboard…",
+    "已插入矢量公式 · {font} · {size} pt · {color}": "Vector equation inserted · {font} · {size} pt · {color}",
+    "插入失败，请检查当前文档后重试。": "Insertion failed. Check the active document and try again.",
+    "无法读取待保存的文件。": "Could not read the file to save.",
+    "文件编码失败。": "Could not encode the file.",
+    "请先完成当前的文件保存。": "Finish saving the current file first.",
+    "文件保存组件未就绪，请重新打开面板。": "File saving is not ready. Reopen the panel.",
+    "文件过大，请降低 PNG 清晰度或改用 SVG。": "The file is too large. Reduce the PNG resolution or use SVG.",
+    "保存公式文件": "Save equation file",
+    "保存": "Save",
+    "文件名": "File name",
+    "无法打开保存对话框，请重试。": "Could not open the save dialog. Try again.",
+    "文件保存失败，请检查目标文件夹的权限和可用空间。": "Could not save the file. Check folder permissions and available space.",
+    "已取消保存。": "Save cancelled.",
+    "已保存：{name}": "Saved: {name}",
+    "此面板完全离线。需要在线帮助时，请在浏览器中自行打开相关页面。": "This panel works entirely offline. Open online help separately in your browser.",
+    "浏览器预览：请在 Illustrator 的扩展面板中使用「插入当前画板」。": "Browser preview: use “Insert into artboard” in the Illustrator extension panel.",
+    "请求数据格式无效。": "The request data format is invalid.",
+    "请求数据中的字符转义无效。": "The request contains an invalid character escape.",
+    "请求数据含有无效控制字符。": "The request contains an invalid control character.",
+    "请求数据中的字符串未结束。": "A string in the request is incomplete.",
+    "请求数据嵌套过深。": "The request contains too many nested levels.",
+    "请求包含不支持的字段。": "The request contains an unsupported field.",
+    "请求包含重复字段。": "The request contains a duplicate field.",
+    "请求数据未结束。": "The request data is incomplete.",
+    "请求包含无效数字。": "The request contains an invalid number.",
+    "请求末尾含有无效数据。": "The request has invalid trailing data.",
+    "Illustrator 插入公式失败，请重试。": "Illustrator could not insert the equation. Try again.",
+    "公式插入请求无效。": "The equation insertion request is invalid.",
+    "公式 SVG 为空或过大，请拆分公式后插入。": "The equation SVG is empty or too large. Split the equation before inserting it.",
+    "公式尺寸超出 Illustrator 支持范围，请减小字号或拆分公式。": "The equation exceeds Illustrator’s size limit. Reduce its font size or split the equation.",
+    "公式代码为空或过长，请检查后重试。": "The equation code is empty or too long. Check it and try again.",
+    "公式字号应在 4–96 pt 之间。": "The equation font size must be between 4 and 96 pt.",
+    "公式字体无效，请重新选择。": "The equation font is invalid. Select it again.",
+    "公式颜色无效，请重新选择。": "The equation color is invalid. Select it again.",
+    "公式 SVG 含有外部引用或不支持的内容。": "The equation SVG contains external references or unsupported content.",
+    "公式 SVG 格式无效。": "The equation SVG format is invalid.",
+    "公式 SVG 不是独立矢量路径，请重新生成后插入。": "The equation SVG is not made of self-contained vector paths. Generate it again before inserting.",
+    "公式尺寸与 SVG 不一致，请重新生成后插入。": "The equation dimensions do not match its SVG. Generate it again before inserting.",
+    "无法建立本地临时文件，请稍后重试。": "Could not create a local temporary file. Try again later.",
+    "公式插入请求为空或过大。": "The equation insertion request is empty or too large.",
+    "请先在 Illustrator 中新建或打开一个文档，再插入公式。": "Create or open an Illustrator document before inserting an equation.",
+    "当前文档已切换，请重新点击插入公式。": "The active document changed. Click Insert into artboard again.",
+    "当前画板已切换，请重新点击插入公式。": "The active artboard changed. Click Insert into artboard again.",
+    "无法写入本地临时 SVG，请检查临时文件夹权限。": "Could not write the temporary SVG. Check temporary folder permissions.",
+    "写入本地临时 SVG 失败。": "Could not write the temporary SVG.",
+    "Illustrator 无法打开生成的公式 SVG。": "Illustrator could not open the generated equation SVG.",
+    "导入内容不是独立矢量路径，已取消插入。": "The imported content is not made of self-contained vector paths. Insertion was cancelled.",
+    "生成的公式画布尺寸无效。": "The generated equation canvas dimensions are invalid.",
+    "公式中没有可插入的矢量图形。": "The equation has no vector paths to insert.",
+    "导入的公式画布边界无效。": "The imported equation canvas bounds are invalid."
+});
+  const t = (text, params) => root.WordI18n ? root.WordI18n.t(text, params) : String(text).replace(/\{(\w+)\}/g, (match, key) => params && key in params ? String(params[key]) : match);
   document.body.classList.add('illustrator-panel');
 
   const actions = document.createElement('div');
   actions.className = 'illustrator-actions';
-  actions.innerHTML = '<div class="illustrator-action-row"><button type="button" id="insertIllustratorButton" class="primary" disabled>插入当前画板</button><button type="button" id="refreshIllustratorButton" class="subtle-btn" title="检查当前 Illustrator 文档">刷新文档</button></div><p id="illustratorStatus" role="status">正在连接 Illustrator…</p><p class="illustrator-action-note">插入为可编辑的矢量路径 · 使用所选字体、字号和颜色</p>';
+  actions.innerHTML = '<div class="illustrator-action-row"><button type="button" id="insertIllustratorButton" class="primary" disabled data-i18n="插入当前画板">插入当前画板</button><button type="button" id="refreshIllustratorButton" class="subtle-btn" title="检查当前 Illustrator 文档" data-i18n-title="检查当前 Illustrator 文档" data-i18n="刷新文档">刷新文档</button></div><p id="illustratorStatus" role="status">正在连接 Illustrator…</p><p class="illustrator-action-note" data-i18n="插入为可编辑的矢量路径 · 使用所选字体、字号和颜色">插入为可编辑的矢量路径 · 使用所选字体、字号和颜色</p>';
   $('previewCard').insertBefore(actions, $('previewCard').querySelector('.preview-surface'));
-  document.title = '公式转写 · Illustrator';
   const localLabel = document.querySelector('header .local');
-  if (localLabel) localLabel.textContent = '完全离线';
+  if (localLabel) localLabel.setAttribute('data-i18n', '完全离线');
+  const privacyNote = $('privacyNote');
+  if (privacyNote) privacyNote.setAttribute('data-i18n', 'Word 文档与公式只在本机处理，不会上传。');
   const styleNote = document.querySelector('.formula-style-note');
-  if (styleNote) styleNote.textContent = '用于预览、导出与插入 · 缩放仅用于查看';
-  const previewNote = document.querySelector('.preview-footer span:last-child');
-  if (previewNote) previewNote.textContent = '长公式可横向滚动';
+  if (styleNote) styleNote.setAttribute('data-i18n', '用于预览、导出与插入 · 缩放仅用于查看');
+  const previewNote = document.querySelector('.preview-footer > span:last-child');
+  if (previewNote) previewNote.setAttribute('data-i18n', '长公式可横向滚动');
 
   let cs = null;
   let inserting = false;
@@ -31,8 +105,11 @@
     } else if (root.__adobe_cep__ && typeof root.CSInterface === 'function') cs = new root.CSInterface();
   } catch { /* The browser can still show a faithful, non-mutating panel preview. */ }
 
+  let statusText = () => t('正在连接 Illustrator…');
+  let saveNoticeId = 0;
   function message(text, error = false) {
-    $('illustratorStatus').textContent = text;
+    statusText = typeof text === 'function' ? text : () => t(text);
+    $('illustratorStatus').textContent = statusText();
     $('illustratorStatus').classList.toggle('error', error);
   }
   function unwrap(value) {
@@ -43,7 +120,7 @@
   }
   function updateButton() {
     $('insertIllustratorButton').disabled = !cs || !available || inserting || saving || refreshing || !$('preview').querySelector('.katex-html') || $('exportSvgButton').disabled || !unwrap($('outputCode').value);
-    $('insertIllustratorButton').textContent = inserting ? '正在插入…' : '插入当前画板';
+    $('insertIllustratorButton').textContent = t(inserting ? '正在插入…' : '插入当前画板');
     $('refreshIllustratorButton').disabled = !cs || inserting || saving || refreshing;
   }
   function hostCall(script, timeoutMs = 15000) {
@@ -81,7 +158,7 @@
     try {
       const result = await hostCall('WordEquationAI.status()');
       available = true;
-      if (!quiet) message(result.hasDocument ? '当前文档：' + (result.documentName || '未命名') + ' · 画板 ' + (Number(result.artboardIndex || 0) + 1) : '请先在 Illustrator 中新建或打开文档，再插入公式。');
+      if (!quiet) message(() => result.hasDocument ? t('当前文档：{name} · 画板 {number}', {name: result.documentName || t('未命名'), number: Number(result.artboardIndex || 0) + 1}) : t('请先在 Illustrator 中新建或打开文档，再插入公式。'));
     } catch (error) { available = false; message(error.message, true); }
     finally { refreshing = false; updateButton(); }
   }
@@ -91,7 +168,8 @@
       latex: unwrap($('outputCode').value),
       fontFamily: $('formulaFontFamily').value,
       fontSizePt: Number($('formulaFontSize').value),
-      color: $('formulaColorPicker').value
+      color: $('formulaColorPicker').value,
+      language: root.WordI18n ? root.WordI18n.language : 'zh'
     };
     inserting = true; updateButton();
     message('正在本机生成矢量公式…');
@@ -109,7 +187,7 @@
       // A mutating host operation intentionally has no automatic timeout: an
       // outstanding import must finish before a second click can duplicate it.
       await hostCall('WordEquationAI.insertSvg(' + argument + ')', 0);
-      message('已插入矢量公式 · ' + root.WordFormulaFonts.get(snapshot.fontFamily).label + ' · ' + snapshot.fontSizePt + ' pt · ' + snapshot.color);
+      message(() => t('已插入矢量公式 · {font} · {size} pt · {color}', {font: t(root.WordFormulaFonts.get(snapshot.fontFamily).label), size: snapshot.fontSizePt, color: snapshot.color}));
     } catch (error) { message(error.message || '插入失败，请检查当前文档后重试。', true); }
     finally { inserting = false; updateButton(); }
   }
@@ -144,7 +222,7 @@
     try {
       const name = String(fileName).split(/[\\/]/).pop() || 'equation.svg';
       const extension = name.includes('.') ? name.split('.').pop().toLowerCase() : '';
-      const choice = root.cep.fs.showSaveDialogEx('保存公式文件', '', extension ? [extension] : [], name, '', '保存', '文件名');
+      const choice = root.cep.fs.showSaveDialogEx(t('保存公式文件'), '', extension ? [extension] : [], name, '', t('保存'), t('文件名'));
       if (!choice || choice.err !== 0) throw new Error('无法打开保存对话框，请重试。');
       if (!choice.data) return {cancelled: true, name};
       const encoded = await base64Of(blob);
@@ -154,6 +232,7 @@
     } finally { saving = false; updateButton(); }
   }
   function downloadMessage(text, error, fileName) {
+    text = t(text);
     message(text, error);
     if (/\.(?:svg|png)$/i.test(fileName)) {
       $('imageExportStatus').textContent = text;
@@ -162,7 +241,8 @@
     // The original HTML has an immediate browser-download toast; native save
     // completion or cancellation is the authoritative result in Illustrator.
     $('toast').textContent = text; $('toast').hidden = false;
-    setTimeout(() => { if ($('toast').textContent === text) $('toast').hidden = true; }, 3500);
+    const noticeId = ++saveNoticeId;
+    setTimeout(() => { if (saveNoticeId === noticeId) $('toast').hidden = true; }, 3500);
   }
   if (cs) {
     const blobs = new Map();
@@ -175,7 +255,7 @@
       const blob = this.download && blobs.get(this.href);
       if (!blob) return click.call(this);
       const name = this.download;
-      saveBlob(blob, name).then((result) => downloadMessage(result.cancelled ? '已取消保存。' : '已保存：' + result.name, false, name))
+      saveBlob(blob, name).then((result) => downloadMessage(result.cancelled ? t('已取消保存。') : t('已保存：{name}', {name: result.name}), false, name))
         .catch((error) => downloadMessage(error.message, true, name));
     };
   }
@@ -188,6 +268,19 @@
       message('此面板完全离线。需要在线帮助时，请在浏览器中自行打开相关页面。');
     }
   }, true);
+  function refreshLanguage() {
+    document.title = t('公式转写 · Illustrator');
+    if (root.WordI18n) {
+      root.WordI18n.refresh(actions);
+      [localLabel, privacyNote, styleNote, previewNote].filter(Boolean).forEach((element) => { element.textContent = t(element.getAttribute('data-i18n')); });
+    }
+    $('illustratorStatus').textContent = statusText();
+    $('imageExportStatus').textContent = t($('imageExportStatus').textContent);
+    $('toast').textContent = t($('toast').textContent);
+    updateButton();
+  }
+  root.addEventListener('word-language-change', refreshLanguage);
+  refreshLanguage();
   if (cs) refreshDocument();
   else { message('浏览器预览：请在 Illustrator 的扩展面板中使用「插入当前画板」。'); updateButton(); }
   root.WordIllustratorPanel = Object.freeze({refreshDocument, saveBlob});

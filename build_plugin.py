@@ -42,7 +42,7 @@ def main():
     with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as package:
         for member in members + ['SHA256SUMS.txt']:
             package.write(OUTPUT / member, BUNDLE + '/' + member)
-        for filename in ['install.py', '安装到Illustrator.command', '卸载插件.command', '使用说明.md']:
+        for filename in ['install.py', '安装到Illustrator.command', '卸载插件.command', 'Install.command', 'Uninstall.command', '使用说明.md', 'USAGE.en.md']:
             source = PLUGIN / filename
             if source.exists():
                 package.write(source, filename)

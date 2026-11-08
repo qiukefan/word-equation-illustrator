@@ -14,6 +14,40 @@ STATE = Path.home() / 'Library/Application Support/WordEquationIllustrator'
 DOMAIN = 'com.adobe.CSXS.12'
 FILES = ['index.html', 'CSXS/manifest.xml', 'host/host.jsx', 'SHA256SUMS.txt']
 
+LANGUAGE = 'zh'
+MESSAGES_EN = {
+    "Word 公式转 LaTeX · Illustrator 本地安装": "Word → LaTeX · Local Illustrator installer",
+    "只复制插件，不修改 Adobe 的加载设置": "Copy the extension without changing Adobe loading preferences",
+    "已明确同意：允许 CEP 12 加载未签名本地扩展": "Explicitly consent to allowing CEP 12 to load unsigned local extensions",
+    "将本插件移至备份目录": "Move this extension to the backup directory",
+    "插件已移至备份：": "Extension moved to backup:",
+    "未发现已安装的本插件。": "This extension is not installed.",
+    "安装时曾启用 CEP 12 的未签名扩展加载。恢复后，其他未签名 CEP 12 插件也可能无法加载。": "Installation enabled unsigned extension loading for CEP 12. Restoring the original preference may prevent other unsigned CEP 12 extensions from loading.",
+    "如需恢复安装前设置，请输入 RESTORE；直接回车保留：": "Type RESTORE to restore the original preference, or press Return to keep it: ",
+    "请自行关闭并重新打开 Illustrator，以刷新扩展列表。": "Close and reopen Illustrator when convenient to refresh the extension list.",
+    "未找到插件文件夹。请先完整解压安装包。": "Extension folder not found. Fully extract the installation package first.",
+    "插件文件夹不能是符号链接。请重新解压安装包。": "The extension folder cannot be a symbolic link. Extract the package again.",
+    "插件文件缺失或包含符号链接：": "An extension file is missing or is a symbolic link: ",
+    "插件文件清单无效。": "The extension checksum manifest is invalid.",
+    "插件文件清单不完整。请重新解压安装包。": "The extension checksum manifest is incomplete. Extract the package again.",
+    "插件文件校验失败，请重新解压安装包：": "Extension file verification failed. Extract the package again: ",
+    "这是为本机制作的未签名 CEP 插件。Adobe 默认不加载未签名扩展。": "This is an unsigned local CEP extension. Adobe does not load unsigned extensions by default.",
+    "继续会把 com.adobe.CSXS.12 的 PlayerDebugMode 设为 1。": "Continuing sets PlayerDebugMode to 1 in com.adobe.CSXS.12.",
+    "此设置允许本机所有 CEP 12 宿主加载未签名扩展，并非只允许这个插件。": "This preference lets all CEP 12 hosts on this computer load unsigned extensions, not only this extension.",
+    "不会更改 macOS Gatekeeper，不需要管理员权限，不安装 Rosetta，也不上传文件。": "No macOS Gatekeeper changes, administrator privileges, Rosetta installation, or file uploads are involved.",
+    "明确同意此设置并安装，请输入 ENABLE；直接回车取消：": "Type ENABLE to consent to this preference and install, or press Return to cancel: ",
+    "已取消，未修改任何设置或安装文件。": "Cancelled. No preferences or installation files were changed.",
+    "Adobe 加载设置未能自动恢复；原值仍保存在：": "The Adobe loading preference could not be restored automatically. Its original value remains saved in:",
+    "插件文件已安装：": "Extension files installed:",
+    "仅复制文件；Adobe 仍会阻止此未签名插件加载。": "Files were copied only. Adobe will still prevent this unsigned extension from loading.",
+    "保存自己的工作后，关闭并重新打开 Illustrator。": "Save your work, then close and reopen Illustrator.",
+    "从「窗口 → 扩展 → Word → LaTeX」打开面板。": "Open the panel from Window → Extensions → Word → LaTeX."
+}
+
+
+def tr(message):
+    return MESSAGES_EN.get(message, message) if LANGUAGE == 'en' else message
+
 
 def set_preference(value):
     if value is None:
@@ -36,63 +70,69 @@ def backup(path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Word 公式转 LaTeX · Illustrator 本地安装')
+    global LANGUAGE
+    language_parser = argparse.ArgumentParser(add_help=False)
+    language_parser.add_argument('--language', choices=['zh', 'en'], default='zh')
+    language_args, _ = language_parser.parse_known_args()
+    LANGUAGE = language_args.language
+    parser = argparse.ArgumentParser(description=tr('Word 公式转 LaTeX · Illustrator 本地安装'))
+    parser.add_argument('--language', choices=['zh', 'en'], default='zh', help='界面语言 / Interface language')
     mode = parser.add_mutually_exclusive_group()
-    mode.add_argument('--copy-only', action='store_true', help='只复制插件，不修改 Adobe 的加载设置')
-    mode.add_argument('--enable-unsigned', action='store_true', help='已明确同意：允许 CEP 12 加载未签名本地扩展')
-    mode.add_argument('--uninstall', action='store_true', help='将本插件移至备份目录')
+    mode.add_argument('--copy-only', action='store_true', help=tr('只复制插件，不修改 Adobe 的加载设置'))
+    mode.add_argument('--enable-unsigned', action='store_true', help=tr('已明确同意：允许 CEP 12 加载未签名本地扩展'))
+    mode.add_argument('--uninstall', action='store_true', help=tr('将本插件移至备份目录'))
     args = parser.parse_args()
     state_file = STATE / 'install-state.json'
     previous = json.loads(state_file.read_text()) if state_file.exists() else {}
     if args.uninstall:
         if DEST.exists() or DEST.is_symlink():
-            print('插件已移至备份：', backup(DEST))
+            print(tr('插件已移至备份：'), backup(DEST))
         else:
-            print('未发现已安装的本插件。')
+            print(tr('未发现已安装的本插件。'))
         if previous.get('enabled_by_installer') and preference() == '1':
-            print('安装时曾启用 CEP 12 的未签名扩展加载。恢复后，其他未签名 CEP 12 插件也可能无法加载。')
-            if input('如需恢复安装前设置，请输入 RESTORE；直接回车保留：').strip() == 'RESTORE':
+            print(tr('安装时曾启用 CEP 12 的未签名扩展加载。恢复后，其他未签名 CEP 12 插件也可能无法加载。'))
+            if input(tr('如需恢复安装前设置，请输入 RESTORE；直接回车保留：')).strip() == 'RESTORE':
                 original = previous.get('original_debug_mode')
                 set_preference(original)
                 previous['enabled_by_installer'] = False
                 state_file.write_text(json.dumps(previous, ensure_ascii=False, indent=2))
-        print('请自行关闭并重新打开 Illustrator，以刷新扩展列表。')
+        print(tr('请自行关闭并重新打开 Illustrator，以刷新扩展列表。'))
         return
 
     source = ROOT / BUNDLE
     if not source.is_dir():
         source = ROOT / 'build' / BUNDLE
     if not source.is_dir():
-        raise SystemExit('未找到插件文件夹。请先完整解压安装包。')
+        raise SystemExit(tr('未找到插件文件夹。请先完整解压安装包。'))
     if source.is_symlink():
-        raise SystemExit('插件文件夹不能是符号链接。请重新解压安装包。')
+        raise SystemExit(tr('插件文件夹不能是符号链接。请重新解压安装包。'))
     for name in FILES:
         path = source / name
         if not path.is_file() or any(part.is_symlink() for part in [path, *path.parents] if part != source and source in part.parents):
-            raise SystemExit('插件文件缺失或包含符号链接：' + name)
+            raise SystemExit(tr('插件文件缺失或包含符号链接：') + name)
     checksums = {}
     for line in (source / 'SHA256SUMS.txt').read_text().splitlines():
         fields = line.split('  ', 1)
         if len(fields) != 2:
-            raise SystemExit('插件文件清单无效。')
+            raise SystemExit(tr('插件文件清单无效。'))
         expected, name = fields
         if name not in FILES[:-1] or name in checksums or len(expected) != 64 or any(c not in '0123456789abcdef' for c in expected):
-            raise SystemExit('插件文件清单无效。')
+            raise SystemExit(tr('插件文件清单无效。'))
         checksums[name] = expected
     if set(checksums) != set(FILES[:-1]):
-        raise SystemExit('插件文件清单不完整。请重新解压安装包。')
+        raise SystemExit(tr('插件文件清单不完整。请重新解压安装包。'))
     for name, expected in checksums.items():
         if hashlib.sha256((source / name).read_bytes()).hexdigest() != expected:
-            raise SystemExit('插件文件校验失败，请重新解压安装包：' + name)
+            raise SystemExit(tr('插件文件校验失败，请重新解压安装包：') + name)
     enabled = preference() == '1'
     enable_after_copy = False
     if not enabled and not args.copy_only:
-        print('这是为本机制作的未签名 CEP 插件。Adobe 默认不加载未签名扩展。')
-        print('继续会把 com.adobe.CSXS.12 的 PlayerDebugMode 设为 1。')
-        print('此设置允许本机所有 CEP 12 宿主加载未签名扩展，并非只允许这个插件。')
-        print('不会更改 macOS Gatekeeper，不需要管理员权限，不安装 Rosetta，也不上传文件。')
-        if not args.enable_unsigned and input('明确同意此设置并安装，请输入 ENABLE；直接回车取消：').strip() != 'ENABLE':
-            print('已取消，未修改任何设置或安装文件。')
+        print(tr('这是为本机制作的未签名 CEP 插件。Adobe 默认不加载未签名扩展。'))
+        print(tr('继续会把 com.adobe.CSXS.12 的 PlayerDebugMode 设为 1。'))
+        print(tr('此设置允许本机所有 CEP 12 宿主加载未签名扩展，并非只允许这个插件。'))
+        print(tr('不会更改 macOS Gatekeeper，不需要管理员权限，不安装 Rosetta，也不上传文件。'))
+        if not args.enable_unsigned and input(tr('明确同意此设置并安装，请输入 ENABLE；直接回车取消：')).strip() != 'ENABLE':
+            print(tr('已取消，未修改任何设置或安装文件。'))
             return
         enable_after_copy = True
     DEST.parent.mkdir(parents=True, exist_ok=True)
@@ -127,7 +167,7 @@ def main():
                 set_preference(original_preference)
         except Exception:
             preference_restored = False
-            print('Adobe 加载设置未能自动恢复；原值仍保存在：', state_file)
+            print(tr('Adobe 加载设置未能自动恢复；原值仍保存在：'), state_file)
         if state_attempted and preference_restored:
             if state_before is None:
                 state_file.unlink(missing_ok=True)
@@ -138,11 +178,11 @@ def main():
         if old:
             shutil.move(str(old), str(DEST))
         raise
-    print('插件文件已安装：', DEST)
+    print(tr('插件文件已安装：'), DEST)
     if not enabled:
-        print('仅复制文件；Adobe 仍会阻止此未签名插件加载。')
-    print('保存自己的工作后，关闭并重新打开 Illustrator。')
-    print('从「窗口 → 扩展 → Word 公式转 LaTeX」打开面板。')
+        print(tr('仅复制文件；Adobe 仍会阻止此未签名插件加载。'))
+    print(tr('保存自己的工作后，关闭并重新打开 Illustrator。'))
+    print(tr('从「窗口 → 扩展 → Word → LaTeX」打开面板。'))
 
 
 if __name__ == '__main__':

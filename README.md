@@ -11,11 +11,13 @@
 
 ### 功能
 
+- 右上角「中文 / English」随时切换界面语言，保留当前公式与样式。
+
 - 从 Word 复制原生公式，或本地导入 `.docx` 提取公式。
 - 选择 11 种内置数学字体样式、4–96 pt 字号和十六进制颜色。
 - 实时预览，导出 PNG、SVG、`.tex` 和 `.md`。
 - 通过 macOS 原生保存对话框导出文件。
-- 将公式作为可编辑矢量路径组，居中插入当前画板的新“公式”图层。
+- 将公式作为可编辑矢量路径组，居中插入当前画板的新“公式”图层（英文界面为“Equation”）。
 - 排版库和字体内置，支持完全离线使用。
 
 ### 安装与环境
@@ -26,13 +28,15 @@
 2. 双击 `安装到Illustrator.command`。
 3. 阅读安装器提示。未启用本地扩展加载时，输入 `ENABLE` 才会安装并把 CEP 12 的 `PlayerDebugMode` 设为 `1`；直接回车取消。
 4. 保存工作并重启 Illustrator。
-5. 打开 **窗口 → 扩展功能 → Word 公式转 LaTeX**。
+5. 打开 **窗口 → 扩展功能 → Word → LaTeX**。
 
 这个加载设置适用于所有 CEP 12 宿主，允许它们加载未签名扩展。安装器不会改动 Gatekeeper，不需要管理员权限，也不会关闭 Illustrator。若保留 Adobe 默认验签设置，可暂不安装此开发版。
 
 插件安装到 `~/Library/Application Support/Adobe/CEP/extensions/local.word-equation.illustrator`。已存在的同名插件会先移至 `~/Library/Application Support/WordEquationIllustrator/Backups`。完整说明见 [使用说明](使用说明.md)。
 
 ### 使用
+
+面板右上角选择 **中文** 或 **English** 即可切换；无需重新导入或转换公式。切换过程完全在本机完成，不会上传文档内容。
 
 1. 在 Illustrator 中新建或打开文档，激活目标画板。
 2. 在面板输入框用 `⌘V` 粘贴 Word 公式，导入 `.docx`，或直接编辑 LaTeX。
@@ -78,7 +82,7 @@ python3 build_plugin.py
 python3 -m http.server 8766 --bind 127.0.0.1
 ```
 
-打开 `http://127.0.0.1:8766/tests/panel.html` 可运行 7 项面板集成检查。测试采用合成公式和模拟的 Illustrator / 保存对话框，不读取用户文档或剪贴板，不执行真实插入或保存。`tests/preview.html` 可查看面板布局。该服务器仅用于开发验证，插件运行不需要它。
+打开 `http://127.0.0.1:8766/tests/panel.html` 可运行 9 项面板集成检查。测试采用合成公式和模拟的 Illustrator / 保存对话框，不读取用户文档或剪贴板，不执行真实插入或保存。`tests/preview.html` 可查看面板布局。该服务器仅用于开发验证，插件运行不需要它。
 
 插入代码曾在 Illustrator 30.5.1 中验证：生成 159 × 45 pt 的矢量公式，画板居中，无栅格图、链接图或字体文本。
 
@@ -105,11 +109,13 @@ Designed for **macOS · Illustrator 2026 (30.x) · CEP 12**. This is an unsigned
 
 ### Features
 
+- Switch between Chinese and English using the top-right language selector without losing the current equation or style settings.
+
 - Paste native Word equations or extract equations from a locally imported `.docx` file.
 - Choose from 11 bundled mathematical font styles, sizes from 4 to 96 pt, and hexadecimal colors.
 - Preview equations live and export PNG, SVG, `.tex`, and `.md` files.
 - Save exports using native macOS file dialogs.
-- Insert each equation as an editable vector path group, centered on the active artboard in a new layer named “公式”.
+- Insert each equation as an editable vector path group, centered on the active artboard in a new layer named “Equation” (“公式” in Chinese).
 - Use the extension entirely offline, with typesetting libraries and fonts included.
 
 ### Requirements and installation
@@ -117,21 +123,23 @@ Designed for **macOS · Illustrator 2026 (30.x) · CEP 12**. This is an unsigned
 You need macOS, Illustrator 2026 (30.x, CEP 12), and Python 3.9 or later. Both the installer and source build require Python. The installer command uses `/usr/bin/python3` and has been verified with Python 3.9.6.
 
 1. Download and fully extract the [complete installation package](releases/Word公式转LaTeX-Illustrator-1.0.0.zip).
-2. Double-click `安装到Illustrator.command`.
+2. Double-click `Install.command`.
 3. Read the installer prompts. If unsigned extension loading is not already enabled, type `ENABLE` to install and set CEP 12's `PlayerDebugMode` to `1`. Pressing Return without entering `ENABLE` cancels installation.
 4. Save your work and restart Illustrator.
-5. Open **Window → Extensions → Word 公式转 LaTeX**.
+5. Open **Window → Extensions → Word → LaTeX**.
 
 This loading preference applies to all CEP 12 hosts and allows them to load unsigned extensions. The installer does not change Gatekeeper, require administrator privileges, or close Illustrator. If you wish to retain Adobe's default signature verification settings, do not install this development build yet.
 
-The extension is installed at `~/Library/Application Support/Adobe/CEP/extensions/local.word-equation.illustrator`. An existing extension with the same identifier is moved to `~/Library/Application Support/WordEquationIllustrator/Backups` first. Further details are available in the [Chinese usage guide](使用说明.md).
+The extension is installed at `~/Library/Application Support/Adobe/CEP/extensions/local.word-equation.illustrator`. An existing extension with the same identifier is moved to `~/Library/Application Support/WordEquationIllustrator/Backups` first. Further details are available in the [English usage guide](USAGE.en.md).
 
 ### Usage
+
+Choose **English** from the language selector in the top-right corner of the panel. The selector also lets you switch back to **中文**.
 
 1. Create or open an Illustrator document and activate the target artboard.
 2. Paste a Word equation into the panel with `⌘V`, import a `.docx` file, or edit LaTeX directly.
 3. Select the font style, size, and color, then check the preview.
-4. Click “插入当前画板” (Insert into active artboard). Insertion is cancelled if the active document or artboard changes while the equation is being generated.
+4. Click “Insert into artboard”. Insertion is cancelled if the active document or artboard changes while the equation is being generated.
 5. Use the PNG, SVG, `.tex`, or `.md` export buttons when you need a separate file.
 
 Preview zoom changes only the viewing scale; it does not change the size used for export or insertion. If CEP does not support the clipboard-reading button, paste directly into the input area.
@@ -145,7 +153,7 @@ Preview zoom changes only the viewing scale; it does not change the size used fo
 
 ### Uninstallation and preference restoration
 
-Double-click `卸载插件.command`. The uninstaller moves this extension to the backup directory and does not remove other extensions.
+Double-click `Uninstall.command`. The uninstaller moves this extension to the backup directory and does not remove other extensions.
 
 If the installer previously enabled unsigned extension loading, the uninstaller separately asks whether to restore the original preference. Type `RESTORE` to restore it, or press Return to keep the current setting. Restoring this preference may affect other unsigned CEP 12 extensions. Save your work and restart Illustrator afterward.
 
@@ -172,7 +180,7 @@ Start a temporary static server that listens only on the local computer:
 python3 -m http.server 8766 --bind 127.0.0.1
 ```
 
-Open `http://127.0.0.1:8766/tests/panel.html` to run seven panel integration checks. These tests use synthetic equations and simulated Illustrator and file-dialog interfaces. They do not read user documents or the clipboard, and they do not perform real insertion or file saving. Open `tests/preview.html` to inspect the panel layout. This server is only for development checks; the extension does not require it to run.
+Open `http://127.0.0.1:8766/tests/panel.html` to run nine panel integration checks. These tests use synthetic equations and simulated Illustrator and file-dialog interfaces. They do not read user documents or the clipboard, and they do not perform real insertion or file saving. Open `tests/preview.html` to inspect the panel layout. This server is only for development checks; the extension does not require it to run.
 
 The insertion code was also tested in Illustrator 30.5.1: it produced a centered 159 × 45 pt vector equation with no raster images, linked images, or font-based text.
 

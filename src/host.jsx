@@ -206,7 +206,7 @@ var WordEquationAI = (function () {
             var frame = sourceGroup.pathItems.rectangle(sourceRect[1], sourceRect[0], sourceWidth, sourceHeight);
             frame.name = frameName; frame.filled = false; frame.stroked = false;
             target.activate();
-            layer = target.layers.add(); layer.name = '公式';
+            layer = target.layers.add(); layer.name = payload.language === 'en' ? 'Equation' : '公式';
             imported = sourceGroup.duplicate(layer, ElementPlacement.PLACEATBEGINNING);
             var importedFrame = imported.pathItems.getByName(frameName);
             var frameWidth = importedFrame.width, frameHeight = importedFrame.height;
@@ -216,7 +216,7 @@ var WordEquationAI = (function () {
             }
             var bounds = importedFrame.geometricBounds;
             imported.translate((targetRect[0] + targetRect[2] - bounds[0] - bounds[2]) / 2, (targetRect[1] + targetRect[3] - bounds[1] - bounds[3]) / 2);
-            imported.name = '公式 · ' + payload.latex.replace(/\s+/g, ' ').substr(0, 48);
+            imported.name = (payload.language === 'en' ? 'Equation · ' : '公式 · ') + payload.latex.replace(/\s+/g, ' ').substr(0, 48);
             var metadataSaved = true;
             try { imported.note = 'WordEquationAI ' + stringify({version: 1, latex: payload.latex, fontFamily: payload.fontFamily, fontSizePt: payload.fontSizePt, color: payload.color, widthPt: payload.widthPt, heightPt: payload.heightPt}); }
             catch (metadataError) { metadataSaved = false; }

@@ -91,7 +91,9 @@ function mockNativeBridge(){
       mock.status={ok:true,hasDocument:true,documentName:'Synthetic document.ai',documentToken:'test-document-1',artboardIndex:2};
       mock.statusError=null;mock.insertError=null;mock.holdInsert=false;mock.pending.splice(0).forEach(finish=>finish());
       mock.cancelSave=false;mock.dialogError=0;mock.writeError=0;
-      await idle();await win.WordIllustratorPanel.refreshDocument();
+      await idle();
+      if (win.WordI18n) win.WordI18n.setLanguage('zh');
+      await win.WordIllustratorPanel.refreshDocument();
       $('clearButton').click();input('outputMode','raw');input('formulaFontFamily','default');input('formulaFontSize',12);input('formulaColor','#000000');input('imageBackground','transparent');input('pngScale','3');
       await setFormula(fixture);await waitFor(()=>!$('insertIllustratorButton').disabled,'Insert button ready');
     }
@@ -177,6 +179,36 @@ function mockNativeBridge(){
         assert(mock.insertions.at(-1).latex===fixture,'Later edits changed the clicked formula snapshot');
       }finally{mock.holdInsert=false;mock.pending.splice(0).forEach(finish=>finish());}
       await idle();assert($('outputCode').value==='XYZ','Insertion completion replaced the latest editor contents');
+    });
+    await test('Top-right language switching preserves equations and typography and translates native save dialogs',async()=>{
+      input('formulaFontFamily','roman');input('formulaFontSize',18);input('formulaColor','#126bce');
+      const before={code:$('outputCode').value,preview:$('preview').innerHTML};
+      assert($('languageSelect')&&$('languageSelect').closest('header'),'Language selector is not in the panel header');
+      input('languageSelect','en');
+      assert(doc.documentElement.lang==='en','Document language did not switch');
+      assert($('insertIllustratorButton').textContent==='Insert into artboard','Insert action was not translated');
+      assert($('refreshIllustratorButton').textContent==='Refresh document','Document action was not translated');
+      assert($('illustratorStatus').textContent==='Document: Synthetic document.ai · Artboard 3','Connected document status was not translated');
+      assert($('outputCode').value===before.code&&$('preview').innerHTML===before.preview,'Switching language changed the formula or its rendering');
+      assert($('formulaFontFamily').value==='roman'&&$('formulaFontSize').value==='18'&&$('formulaColorPicker').value==='#126bce','Switching language changed the selected typography');
+      await save('exportButton','.tex');
+      const dialog=mock.dialogs.at(-1);
+      assert(dialog.title==='Save equation file'&&dialog.prompt==='Save'&&dialog.nameLabel==='File name','Native save dialog labels were not translated');
+      assert($('illustratorStatus').textContent.startsWith('Saved: '),'Native save completion was not translated');
+      input('languageSelect','zh');
+      assert($('insertIllustratorButton').textContent==='插入当前画板'&&$('illustratorStatus').textContent.startsWith('已保存：'),'Switching back did not restore Chinese UI/status');
+    });
+    await test('English insertion sends the locale and translates host errors without changing document targeting',async()=>{
+      input('languageSelect','en');
+      mock.insertError='当前画板已切换，请重新点击插入公式。';
+      const before=mock.insertions.length;$('insertIllustratorButton').click();
+      await waitFor(()=>mock.insertions.length>before,'English host insertion request');await idle();
+      const payload=mock.insertions.at(-1);
+      assert(payload.language==='en'&&payload.targetDocumentToken==='test-document-1'&&payload.targetArtboardIndex===2,'English insertion lost locale or document targeting');
+      assert($('illustratorStatus').textContent==='The active artboard changed. Click Insert into artboard again.','Host error was not translated');
+      input('languageSelect','zh');
+      assert($('illustratorStatus').textContent==='当前画板已切换，请重新点击插入公式。','Visible host error did not switch back to Chinese');
+      assert(!$('insertIllustratorButton').disabled,'Locale switch left insertion disabled');
     });
     await test('The built panel embeds its resources and blocks external navigation without network access',async()=>{
       const policy=doc.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content||'';

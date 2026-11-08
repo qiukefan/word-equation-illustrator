@@ -72,3 +72,8 @@ body.illustrator-panel{min-width:360px}
 #illustratorStatus.error{color:#ad5d42}
 .illustrator-action-note{color:#8b987f;font-size:9px;line-height:1.6;margin:4px 0 0}
 @media(min-width:850px){.illustrator-panel .workbench{grid-template-columns:1fr 1fr}.illustrator-panel .preview-controls{flex:0 1 auto}.illustrator-panel .formula-style-note{margin-left:auto;flex-basis:auto}.illustrator-panel .image-export-title{width:auto;margin-right:auto}.illustrator-panel .image-export-buttons{width:auto}.illustrator-panel .preview-footer{flex-direction:row;justify-content:space-between}.illustrator-panel .guide-content{grid-template-columns:1fr 1fr 1fr}}
+
+/* Keep language switching reachable in narrow docked panels. */
+.illustrator-panel .header-right{margin-left:auto;gap:8px}
+.illustrator-panel #languageSelect{max-width:104px;min-width:82px;height:30px;padding:3px 6px;font-size:11px}
+@media(max-width:540px){.illustrator-panel header{gap:8px}.illustrator-panel .brand{font-size:12px}.illustrator-panel .header-right .local{display:none}.illustrator-panel #helpButton{font-size:10px}.illustrator-panel .illustrator-action-row{flex-wrap:wrap;gap:8px}}
