@@ -1,0 +1,3 @@
+5400d548d2aa8a0f09fb143ae3f9d58ad637d03221849085cbf533330ad6a361  Word公式转LaTeX-Illustrator-1.1.0.zip
+a09b9ef0f1ebb0cd97cc785805bb28170ce2bc8db800e2d7dcc03a94dab87ffd  WordEquationIllustrator-1.1.0-windows.zip
+bda941f002b636c9abdb40482c9eb46d364462e44271014e960b56ec41de7dec  WordEquationIllustrator-1.1.0-macos.zip

@@ -2194,6 +2194,12 @@ SOFTWARE.
     "保存公式文件": "Save equation file",
     "保存": "Save",
     "文件名": "File name",
+    "第一次使用？关于 Word 公式粘贴": "First time? Pasting Word equations",
+    "选中 Word 里的完整公式，按 Ctrl+C，再到左侧按 Ctrl+V。工具会读取浏览器能提供的公式结构；不同 Word 版本和浏览器的粘贴结果可能不同。": "Select the entire equation in Word and press Ctrl+C, then press Ctrl+V in the input box. The tool reads whatever equation structure the browser provides; results vary by Word version and browser.",
+    "如果你的 Word 提供 LaTeX 格式，在公式选项中选择 LaTeX，再转为「线性」。普通文字粘贴可能丢失结构，请对照原公式核对。": "If your Word version offers LaTeX, choose it in the equation options and convert to Linear. Plain-text pasting can lose structure, so compare with the original equation.",
+    "支持粘贴 MathML、OMML 或 LaTeX；Ctrl + Enter 立即转换。": "Paste MathML, OMML, or LaTeX; press Ctrl + Enter to convert.",
+    "浏览器未允许自动复制。已选中当前公式代码，请按 Ctrl+C；全部公式可用「导出 .tex」保存。": "Automatic copying is unavailable. The current code is selected; press Ctrl+C to copy it. Use Export .tex to save all equations.",
+    "请在左侧输入框按 Ctrl+V 粘贴；当前浏览器未允许按钮读取剪贴板。": "Press Ctrl+V in the input box to paste. This browser did not allow the button to read the clipboard.",
     "无法打开保存对话框，请重试。": "Could not open the save dialog. Try again.",
     "文件保存失败，请检查目标文件夹的权限和可用空间。": "Could not save the file. Check folder permissions and available space.",
     "已取消保存。": "Save cancelled.",
@@ -2250,6 +2256,37 @@ SOFTWARE.
   if (styleNote) styleNote.setAttribute('data-i18n', '用于预览、导出与插入 · 缩放仅用于查看');
   const previewNote = document.querySelector('.preview-footer > span:last-child');
   if (previewNote) previewNote.setAttribute('data-i18n', '长公式可横向滚动');
+
+  // The reusable upstream app was designed for macOS. Adapt only known UI
+  // messages on Windows; equation text and the bundled upstream stay untouched.
+  if (/Win/i.test(root.navigator.platform || '')) {
+    const shortcuts = new Map([
+      ['支持粘贴 MathML、OMML 或 LaTeX；⌘ + Enter 立即转换。', '支持粘贴 MathML、OMML 或 LaTeX；Ctrl + Enter 立即转换。'],
+      ['Paste MathML, OMML, or LaTeX; press ⌘ + Enter to convert.', '支持粘贴 MathML、OMML 或 LaTeX；Ctrl + Enter 立即转换。'],
+      ['浏览器未允许自动复制。已选中当前公式代码，请按 ⌘C；全部公式可用「导出 .tex」保存。', '浏览器未允许自动复制。已选中当前公式代码，请按 Ctrl+C；全部公式可用「导出 .tex」保存。'],
+      ['Automatic copying is unavailable. The current code is selected; press ⌘C to copy it. Use Export .tex to save all equations.', '浏览器未允许自动复制。已选中当前公式代码，请按 Ctrl+C；全部公式可用「导出 .tex」保存。'],
+      ['请在左侧输入框按 ⌘V 粘贴；当前浏览器未允许按钮读取剪贴板。', '请在左侧输入框按 Ctrl+V 粘贴；当前浏览器未允许按钮读取剪贴板。'],
+      ['Press ⌘V in the input box to paste. This browser did not allow the button to read the clipboard.', '请在左侧输入框按 Ctrl+V 粘贴；当前浏览器未允许按钮读取剪贴板。']
+    ]);
+    const guide = new Map([
+      ['第一次使用？关于 Mac 上的 Word 公式粘贴', '第一次使用？关于 Word 公式粘贴'],
+      ['选中 Word 里的完整公式，按 ⌘C，再到左侧按 ⌘V。工具会读取浏览器能提供的公式结构；不同 Word 版本和浏览器的粘贴结果可能不同。', '选中 Word 里的完整公式，按 Ctrl+C，再到左侧按 Ctrl+V。工具会读取浏览器能提供的公式结构；不同 Word 版本和浏览器的粘贴结果可能不同。'],
+      ['如果你的 Word 提供 LaTeX 格式，在公式选项中选择 LaTeX，再转为「线性」。Mac 快捷键为 ⌘⇧=。普通文字粘贴可能丢失结构，请对照原公式核对。', '如果你的 Word 提供 LaTeX 格式，在公式选项中选择 LaTeX，再转为「线性」。普通文字粘贴可能丢失结构，请对照原公式核对。']
+    ]);
+    document.querySelectorAll('#pasteHint kbd').forEach((key) => { if (key.textContent === '⌘') key.textContent = 'Ctrl'; });
+    document.querySelectorAll('#guide [data-i18n]').forEach((element) => {
+      const replacement = guide.get(element.getAttribute('data-i18n'));
+      if (replacement) { element.setAttribute('data-i18n', replacement); element.textContent = t(replacement); }
+    });
+    const hintElements = [$('inputNote'), $('status')].filter(Boolean);
+    const adaptShortcuts = () => hintElements.forEach((element) => {
+      const replacement = shortcuts.get(element.textContent);
+      if (replacement) element.textContent = t(replacement);
+    });
+    const shortcutObserver = new MutationObserver(adaptShortcuts);
+    hintElements.forEach((element) => shortcutObserver.observe(element, {childList: true}));
+    adaptShortcuts();
+  }
 
   let cs = null;
   let inserting = false;
@@ -2379,7 +2416,8 @@ SOFTWARE.
     try {
       const name = String(fileName).split(/[\\/]/).pop() || 'equation.svg';
       const extension = name.includes('.') ? name.split('.').pop().toLowerCase() : '';
-      const choice = root.cep.fs.showSaveDialogEx(t('保存公式文件'), '', extension ? [extension] : [], name, '', t('保存'), t('文件名'));
+      const filterLabel = extension ? extension.toUpperCase() + ' (*.' + extension + ')' : '';
+      const choice = root.cep.fs.showSaveDialogEx(t('保存公式文件'), '', extension ? [extension] : [], name, filterLabel, t('保存'), t('文件名'));
       if (!choice || choice.err !== 0) throw new Error('无法打开保存对话框，请重试。');
       if (!choice.data) return {cancelled: true, name};
       const encoded = await base64Of(blob);

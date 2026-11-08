@@ -26,10 +26,14 @@ const waitFor=async(condition,label,ms=18000)=>{
   const start=performance.now();
   while(!condition()){if(performance.now()-start>ms)throw new Error(label+' timed out');await pause(20);}
 };
-function mockNativeBridge(){
+function mockNativeBridge(platform){
+  if(platform)Object.defineProperty(navigator,'platform',{value:platform,configurable:true});
+  // Clipboard fallbacks are exercised without reading or changing the real clipboard.
+  Object.defineProperty(navigator,'clipboard',{value:{read:async()=>{throw new Error('Synthetic clipboard denial');},writeText:async()=>{throw new Error('Synthetic clipboard denial');}},configurable:true});
+  document.execCommand=()=>false;
   const state=window.__panelMock={
     status:{ok:true,hasDocument:true,documentName:'Synthetic document.ai',documentToken:'test-document-1',artboardIndex:2},
-    statusError:null,insertError:null,holdInsert:false,pending:[],insertions:[],dialogs:[],writeAttempts:[],writes:[],cancelSave:false,dialogError:0,writeError:0
+    statusError:null,insertError:null,holdInsert:false,pending:[],insertions:[],dialogs:[],writeAttempts:[],writes:[],cancelSave:false,savePath:null,dialogError:0,writeError:0
   };
   window.__adobe_cep__={evalScript(script,callback){
     if(script==='WordEquationAI.status()'){
@@ -50,7 +54,7 @@ function mockNativeBridge(){
   window.cep={encoding:{Base64:'Base64'},fs:{
     showSaveDialogEx(title,initialPath,types,defaultName,friendlyPrefix,prompt,nameLabel){
       state.dialogs.push({title,initialPath,types,defaultName,friendlyPrefix,prompt,nameLabel});
-      return{err:state.dialogError,data:state.cancelSave?'':'/synthetic-saves/'+defaultName};
+      return{err:state.dialogError,data:state.cancelSave?'':state.savePath===null?'/synthetic-saves/'+defaultName:state.savePath};
     },
     writeFile(path,data,encoding){
       const record={path,data,encoding};state.writeAttempts.push(record);
@@ -65,7 +69,9 @@ function mockNativeBridge(){
     assert(response.ok,'Build the Illustrator plugin before running these tests');
     const built=await response.text();
     const firstScript=built.search(/<script\b/i);assert(firstScript>=0,'Built panel has no scripts');
-    const injected=built.slice(0,firstScript)+'<script>('+mockNativeBridge.toString()+')();<\/script>\n'+built.slice(firstScript);
+    const platform=new URLSearchParams(location.search).get('platform');
+    assert(!platform||['Win32','MacIntel'].includes(platform),'Unknown synthetic platform');
+    const injected=built.slice(0,firstScript)+'<script>('+mockNativeBridge.toString()+')('+JSON.stringify(platform)+');<\/script>\n'+built.slice(firstScript);
     const loaded=new Promise(resolve=>frame.onload=resolve);frame.srcdoc=injected;await timeout(loaded,15000,'Panel load');
     const win=frame.contentWindow,doc=win.document,mock=win.__panelMock;
     const $=id=>doc.getElementById(id);
@@ -90,7 +96,7 @@ function mockNativeBridge(){
     async function reset(){
       mock.status={ok:true,hasDocument:true,documentName:'Synthetic document.ai',documentToken:'test-document-1',artboardIndex:2};
       mock.statusError=null;mock.insertError=null;mock.holdInsert=false;mock.pending.splice(0).forEach(finish=>finish());
-      mock.cancelSave=false;mock.dialogError=0;mock.writeError=0;
+      mock.cancelSave=false;mock.savePath=null;mock.dialogError=0;mock.writeError=0;
       await idle();
       if (win.WordI18n) win.WordI18n.setLanguage('zh');
       await win.WordIllustratorPanel.refreshDocument();
@@ -156,6 +162,38 @@ function mockNativeBridge(){
       assert(mock.writes.length===before,'Failed native write was treated as a saved file');
       assert($('imageExportStatus').classList.contains('error')&&$('toast').textContent.includes('文件保存失败'),'SVG save error was replaced by a browser-download success message');
       mock.writeError=0;await save('exportButton','.tex');
+    });
+    await test('Windows Unicode and UNC save paths are passed to CEP unchanged',async()=>{
+      const content='Unicode equation: α + β = γ\n';
+      for(const path of [String.raw`C:\Users\测试用户\Documents\公式 100%20.svg`,String.raw`\\server\shared equations\公式.svg`]){
+        mock.savePath=path;
+        const result=await win.WordIllustratorPanel.saveBlob(new win.Blob([content],{type:'image/svg+xml'}),'nested/default.svg');
+        const record=mock.writes.at(-1),dialog=mock.dialogs.at(-1);
+        assert(result.path===path&&record.path===path,'Native save path was decoded, escaped, or normalized');
+        assert(result.name===path.split('\\').at(-1),'Saved filename did not recognize Windows separators');
+        assert(decodeText(record)===content,'Unicode content changed during native save');
+        assert(dialog.defaultName==='default.svg'&&dialog.friendlyPrefix==='SVG (*.svg)','Windows save dialog lacks a filename or readable filter');
+      }
+      const attempts=mock.writeAttempts.length;mock.dialogError=2;
+      let failure='';try{await win.WordIllustratorPanel.saveBlob(new win.Blob(['x']),'equation.svg');}catch(error){failure=error.message;}
+      assert(failure.includes('无法打开保存对话框')&&mock.writeAttempts.length===attempts,'An invalid native dialog result attempted a file write');
+    });
+    await test('Platform shortcuts, clipboard fallbacks, and Ctrl/Command+Enter match the selected OS',async()=>{
+      const windows=/Win/i.test(win.navigator.platform),modifier=windows?'Ctrl':'⌘';
+      assert(doc.querySelector('#pasteHint kbd').textContent===modifier,'Paste hint shows the wrong platform modifier');
+      assert(windows?!$('guide').textContent.includes('Mac')&&$('guide').textContent.includes('Ctrl+C'):$('guide').textContent.includes('⌘C'),'Word help shows the wrong platform instructions');
+      input('sourceInput','x^2');await pause(0);
+      assert($('inputNote').textContent.includes(modifier+' + Enter'),'Input hint shows the wrong conversion shortcut');
+      $('sourceInput').dispatchEvent(new win.KeyboardEvent('keydown',{key:'Enter',ctrlKey:windows,metaKey:!windows,bubbles:true,cancelable:true}));
+      await waitFor(()=>$('outputCode').value==='x^{2}','Platform conversion shortcut');
+      $('copyButton').click();
+      await waitFor(()=>$('status').textContent.includes(windows?'Ctrl+C':'⌘C'),'Copy fallback shortcut');
+      $('pasteButton').click();
+      await waitFor(()=>$('status').textContent.includes(windows?'Ctrl+V':'⌘V'),'Paste fallback shortcut');
+      input('languageSelect','en');await pause(0);
+      assert($('status').textContent.includes(windows?'Ctrl+V':'⌘V'),'Locale switch lost the platform shortcut');
+      input('sourceInput',String.raw`\text{⌘}`);await pause(0);
+      assert($('sourceInput').value===String.raw`\text{⌘}`,'Platform adaptation changed user equation text');
     });
     await test('Missing documents and host connection errors recover without inserting unintended artwork',async()=>{
       const before=mock.insertions.length;mock.status.hasDocument=false;$('insertIllustratorButton').click();

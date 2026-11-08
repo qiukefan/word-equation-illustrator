@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="local.word-equation.illustrator" ExtensionBundleVersion="1.0.0" ExtensionBundleName="Word → LaTeX">
+<ExtensionManifest Version="7.0" ExtensionBundleId="local.word-equation.illustrator" ExtensionBundleVersion="1.1.0" ExtensionBundleName="Word → LaTeX">
   <ExtensionList>
-    <Extension Id="local.word-equation.illustrator.panel" Version="1.0.0"/>
+    <Extension Id="local.word-equation.illustrator.panel" Version="1.1.0"/>
   </ExtensionList>
   <ExecutionEnvironment>
-    <HostList><Host Name="ILST" Version="[30.0,30.99]"/></HostList>
+    <HostList><Host Name="ILST" Version="[29.5.1,30.99]"/></HostList>
     <LocaleList><Locale Code="All"/></LocaleList>
     <RequiredRuntimeList><RequiredRuntime Name="CSXS" Version="12.0"/></RequiredRuntimeList>
   </ExecutionEnvironment>
