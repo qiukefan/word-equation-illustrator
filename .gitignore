@@ -1,0 +1,27 @@
+# Local OS and Python files
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+.openai/
+
+# Private input documents, generated test results, and artwork
+*.docx
+*.doc
+*.ai
+*.pdf
+*.log
+tests/generated/
+tests/illustrator-real-test.json
+tests/host-fixture.json
+
+# Signing tools, local credentials, and certificate material
+tools/
+.env
+.env.*
+*.p12
+*.pfx
+*.pem
+*.key
+*.cer
+*.crt

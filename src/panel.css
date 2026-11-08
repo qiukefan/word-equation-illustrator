@@ -1,0 +1,74 @@
+/* Compact layout for a docked Illustrator panel; all math fonts stay embedded. */
+body.illustrator-panel{min-width:360px}
+.illustrator-panel .shell{max-width:none;padding:0 12px 14px}
+.illustrator-panel header{height:54px;gap:12px}
+.illustrator-panel .brand{font-size:15px;gap:8px;letter-spacing:.3px}
+.illustrator-panel .logo{width:27px;height:29px;font-size:21px;border-radius:7px}
+.illustrator-panel .header-right{gap:12px;font-size:10px}
+.illustrator-panel .header-right .local{display:inline-flex}
+.illustrator-panel .hero,.illustrator-panel #downloadApp,.illustrator-panel #previewExpand,.illustrator-panel .footer-wordmark{display:none}
+.illustrator-panel .workbench{padding-top:12px;gap:12px;min-height:0;grid-template-columns:1fr}
+.illustrator-panel .panel{border-radius:9px}
+.illustrator-panel .panel-head{height:44px;padding:0 14px}
+.illustrator-panel .panel-title{font-size:12px;gap:8px}
+.illustrator-panel .source-body{padding:12px 14px}
+.illustrator-panel .input-top{margin-bottom:9px}
+.illustrator-panel .paste-zone,.illustrator-panel .paste-zone textarea{min-height:100px}
+.illustrator-panel .paste-zone textarea{padding:12px;font-size:12px;line-height:1.65}
+.illustrator-panel .paste-hint{inset:10px;gap:5px}
+.illustrator-panel .paste-hint strong{font-size:12px}
+.illustrator-panel .paste-hint p{font-size:10px;line-height:1.5}
+.illustrator-panel .paste-symbol{display:none}
+.illustrator-panel .input-note{font-size:10px;min-height:0;margin:8px 0 10px}
+.illustrator-panel .primary,.illustrator-panel .secondary{padding:10px 12px;font-size:11px}
+.illustrator-panel .samples{padding:10px 14px;gap:7px}
+.illustrator-panel .sample{padding:5px 8px;font-size:10px}
+.illustrator-panel .result-panel{min-height:0}
+.illustrator-panel .result-toolbar{padding:11px 14px 0}
+.illustrator-panel .output-code{min-height:100px;height:114px;padding:11px 14px;font-size:12px;line-height:1.7}
+.illustrator-panel .code-meta{padding:0 14px 10px;flex-wrap:wrap}
+.illustrator-panel .result-actions{padding:10px 14px;gap:7px;flex-wrap:wrap}
+.illustrator-panel .result-actions .primary{flex-basis:auto}
+.illustrator-panel .result-actions .secondary{padding:10px;font-size:10px;flex:0 1 auto}
+.illustrator-panel .preview-card{margin-top:12px;--canvas-min-height:160px}
+.illustrator-panel .preview-toolbar{padding:12px 14px;min-height:0;gap:10px;flex-wrap:wrap}
+.illustrator-panel .preview-caption{display:none}
+.illustrator-panel .preview-controls{gap:6px;justify-content:space-between;flex:1 1 280px}
+.illustrator-panel .zoom-control button{height:30px;min-width:30px;padding:0 7px}
+.illustrator-panel .zoom-control #previewZoomReset{min-width:53px;font-size:11px}
+.illustrator-panel .preview-tool{height:32px;font-size:10px;padding:0 9px}
+.illustrator-panel .formula-style{padding:11px 14px;gap:10px 14px}
+.illustrator-panel .formula-style select{min-width:160px;max-width:230px}
+.illustrator-panel .formula-style-note{margin:0;flex-basis:100%;font-size:9px}
+.illustrator-panel .formula-font-hint{margin:0;font-size:9px}
+.illustrator-panel .formula-style input,.illustrator-panel .formula-style select{height:30px;font-size:11px}
+.illustrator-panel .formula-style input[type=number]{width:65px}
+.illustrator-panel .formula-style input[type=text]{width:86px}
+.illustrator-panel .preview-surface{padding:12px 12px 0}
+.illustrator-panel .preview{padding:20px;max-height:280px}
+.illustrator-panel .preview-footer{padding:10px 14px;gap:3px;font-size:9px;flex-direction:column}
+.illustrator-panel .image-export{padding:0 14px 12px}
+.illustrator-panel .image-export-row{justify-content:flex-start;gap:8px 12px}
+.illustrator-panel .image-export-title{width:100%;font-size:10px;margin:0}
+.illustrator-panel .image-export-buttons{width:100%;gap:8px}
+.illustrator-panel .image-export-button{flex:1;padding:9px 12px;font-size:11px}
+.illustrator-panel .image-export-status{text-align:left;font-size:9px}
+.illustrator-panel .status{font-size:11px;margin-top:10px}
+.illustrator-panel .equation-list{padding:12px 14px;margin-top:12px}
+.illustrator-panel .equation-list-head{font-size:11px;margin-bottom:10px}
+.illustrator-panel .equation-items{max-height:120px}
+.illustrator-panel .guide{margin:14px 0}
+.illustrator-panel .guide summary{padding:12px 0;font-size:11px}
+.illustrator-panel .guide-content{grid-template-columns:1fr;gap:12px}
+.illustrator-panel .guide-content p{font-size:11px}
+.illustrator-panel footer{padding:10px 0;gap:8px;font-size:10px}
+.illustrator-panel .preview-card.is-expanded{inset:8px;margin:0}
+.illustrator-panel .preview-card.is-expanded .preview{max-height:none;min-height:0}
+.illustrator-actions{flex:none;background:#f4f7ef;border-bottom:1px solid #e1e7db;padding:12px 14px}
+.illustrator-action-row{display:flex;align-items:center;gap:12px}
+.illustrator-action-row .primary{min-height:36px;max-width:300px}
+.illustrator-action-row .subtle-btn{font-size:10px;white-space:nowrap}
+#illustratorStatus{color:#547047;font-size:11px;line-height:1.7;margin:8px 0 0;overflow-wrap:anywhere}
+#illustratorStatus.error{color:#ad5d42}
+.illustrator-action-note{color:#8b987f;font-size:9px;line-height:1.6;margin:4px 0 0}
+@media(min-width:850px){.illustrator-panel .workbench{grid-template-columns:1fr 1fr}.illustrator-panel .preview-controls{flex:0 1 auto}.illustrator-panel .formula-style-note{margin-left:auto;flex-basis:auto}.illustrator-panel .image-export-title{width:auto;margin-right:auto}.illustrator-panel .image-export-buttons{width:auto}.illustrator-panel .preview-footer{flex-direction:row;justify-content:space-between}.illustrator-panel .guide-content{grid-template-columns:1fr 1fr 1fr}}

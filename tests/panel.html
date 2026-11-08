@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Offline Illustrator panel integration tests</title>
+<style>
+body{font:14px system-ui;max-width:1280px;margin:24px auto;padding:0 20px;background:#f8faf7;color:#24352a}h1{font-size:25px}li{margin:12px 0;overflow-wrap:anywhere}.pass{color:#167238}.fail{color:#b42318}code{display:block;font:12px/1.6 monospace}iframe{width:100%;height:1000px;border:1px solid #d9e1d6;background:white}#summary{font-size:18px;font-weight:600}#fixturePayload{display:block;width:100%;height:100px;font:11px monospace}
+</style>
+<h1>Offline Illustrator panel integration tests</h1>
+<p>Uses the complete built panel, its real fonts and image renderer, and synthetic formulas. The Illustrator bridge and native file dialogs are simulated; no documents, clipboard, real downloads, or filesystem writes are accessed.</p>
+<p id="summary">Loading the built panel…</p><ol id="results"></ol>
+<label for="fixturePayload">Synthetic host insertion fixture</label><textarea id="fixturePayload" readonly></textarea>
+<iframe id="app" title="Illustrator panel under test"></iframe>
+<script>
+'use strict';
+globalThis.panelResults=[];
+globalThis.panelComplete=false;
+const frame=document.getElementById('app');
+const assert=(value,message)=>{if(!value)throw new Error(message);};
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const timeout=(promise,ms,label)=>new Promise((resolve,reject)=>{
+  const timer=setTimeout(()=>reject(new Error(label+' timed out')),ms);
+  Promise.resolve(promise).then(value=>{clearTimeout(timer);resolve(value);},error=>{clearTimeout(timer);reject(error);});
+});
+const waitFor=async(condition,label,ms=18000)=>{
+  const start=performance.now();
+  while(!condition()){if(performance.now()-start>ms)throw new Error(label+' timed out');await pause(20);}
+};
+function mockNativeBridge(){
+  const state=window.__panelMock={
+    status:{ok:true,hasDocument:true,documentName:'Synthetic document.ai',documentToken:'test-document-1',artboardIndex:2},
+    statusError:null,insertError:null,holdInsert:false,pending:[],insertions:[],dialogs:[],writeAttempts:[],writes:[],cancelSave:false,dialogError:0,writeError:0
+  };
+  window.__adobe_cep__={evalScript(script,callback){
+    if(script==='WordEquationAI.status()'){
+      callback(state.statusError===null?JSON.stringify(state.status):typeof state.statusError==='string'?state.statusError:JSON.stringify(state.statusError));return;
+    }
+    const prefix='WordEquationAI.insertSvg(';
+    if(script.startsWith(prefix)&&script.endsWith(')')){
+      try{
+        const argument=JSON.parse(script.slice(prefix.length,-1));
+        const payload=JSON.parse(decodeURIComponent(argument));state.insertions.push(payload);
+        const finish=()=>callback(JSON.stringify(state.insertError?{ok:false,error:state.insertError}:{ok:true,documentName:state.status.documentName,artboardIndex:state.status.artboardIndex}));
+        if(state.holdInsert)state.pending.push(finish);else setTimeout(finish,15);
+      }catch(error){callback(JSON.stringify({ok:false,error:'Invalid synthetic host call: '+error.message}));}
+      return;
+    }
+    callback(JSON.stringify({ok:false,error:'Unexpected host call'}));
+  }};
+  window.cep={encoding:{Base64:'Base64'},fs:{
+    showSaveDialogEx(title,initialPath,types,defaultName,friendlyPrefix,prompt,nameLabel){
+      state.dialogs.push({title,initialPath,types,defaultName,friendlyPrefix,prompt,nameLabel});
+      return{err:state.dialogError,data:state.cancelSave?'':'/synthetic-saves/'+defaultName};
+    },
+    writeFile(path,data,encoding){
+      const record={path,data,encoding};state.writeAttempts.push(record);
+      if(state.writeError===0)state.writes.push(record);
+      return{err:state.writeError};
+    }
+  }};
+}
+(async()=>{
+  try{
+    const response=await fetch('../build/local.word-equation.illustrator/index.html',{cache:'no-store'});
+    assert(response.ok,'Build the Illustrator plugin before running these tests');
+    const built=await response.text();
+    const firstScript=built.search(/<script\b/i);assert(firstScript>=0,'Built panel has no scripts');
+    const injected=built.slice(0,firstScript)+'<script>('+mockNativeBridge.toString()+')();<\/script>\n'+built.slice(firstScript);
+    const loaded=new Promise(resolve=>frame.onload=resolve);frame.srcdoc=injected;await timeout(loaded,15000,'Panel load');
+    const win=frame.contentWindow,doc=win.document,mock=win.__panelMock;
+    const $=id=>doc.getElementById(id);
+    const nextFrame=()=>new Promise(resolve=>win.requestAnimationFrame(()=>win.requestAnimationFrame(resolve)));
+    const input=(id,value)=>{$(id).value=String(value);$(id).dispatchEvent(new win.Event('input',{bubbles:true}));$(id).dispatchEvent(new win.Event('change',{bubbles:true}));};
+    const setFormula=async latex=>{input('outputCode',latex);await doc.fonts.ready;await nextFrame();};
+    const fixture=String.raw`A_{ij}+\frac{B}{C}=\int_0^1 x\,dx`;
+    const decode=record=>{
+      assert(record.encoding==='Base64','Native file save did not use Base64');
+      return Uint8Array.from(win.atob(record.data),character=>character.charCodeAt(0));
+    };
+    const decodeText=record=>new TextDecoder().decode(decode(record));
+    const svgDocument=text=>{
+      const parsed=new DOMParser().parseFromString(text,'image/svg+xml');
+      assert(!parsed.querySelector('parsererror'),'SVG is not valid XML');
+      const svg=parsed.documentElement;assert(svg.localName==='svg'&&svg.querySelector('path[d]'),'SVG has no vector glyph paths');
+      assert(!svg.querySelector('script,image,foreignObject,text,use'),'SVG depends on external assets or non-vector text');
+      return svg;
+    };
+    const glyphs=svg=>[...svg.querySelectorAll('path[d]')].map(path=>path.getAttribute('d')).join('|');
+    async function idle(){await waitFor(()=>!$('refreshIllustratorButton').disabled&&!$('pngScale').disabled,'Panel operation finishing');}
+    async function reset(){
+      mock.status={ok:true,hasDocument:true,documentName:'Synthetic document.ai',documentToken:'test-document-1',artboardIndex:2};
+      mock.statusError=null;mock.insertError=null;mock.holdInsert=false;mock.pending.splice(0).forEach(finish=>finish());
+      mock.cancelSave=false;mock.dialogError=0;mock.writeError=0;
+      await idle();await win.WordIllustratorPanel.refreshDocument();
+      $('clearButton').click();input('outputMode','raw');input('formulaFontFamily','default');input('formulaFontSize',12);input('formulaColor','#000000');input('imageBackground','transparent');input('pngScale','3');
+      await setFormula(fixture);await waitFor(()=>!$('insertIllustratorButton').disabled,'Insert button ready');
+    }
+    async function save(button,suffix){
+      const before=mock.writes.length;$(button).click();
+      await waitFor(()=>mock.writes.length>before,'Native save '+suffix);await idle();
+      const record=mock.writes.at(-1);assert(record.path.endsWith(suffix),'Wrong native save extension');return record;
+    }
+    async function test(name,body,skipReset=false){
+      try{if(!skipReset)await reset();await timeout(body(),30000,name);panelResults.push({name,pass:true});}
+      catch(error){panelResults.push({name,pass:false,error:error.message});}
+      const result=panelResults.at(-1),li=document.createElement('li');li.className=result.pass?'pass':'fail';li.textContent=(result.pass?'PASS: ':'FAIL: ')+name;
+      if(result.error){const code=document.createElement('code');code.textContent=result.error;li.append(code);}
+      document.getElementById('results').append(li);
+      document.getElementById('summary').textContent=panelResults.filter(result=>result.pass).length+' / '+panelResults.length+' passed';
+    }
+    await test('The built panel connects, keeps conversion controls, and disables insertion until valid',async()=>{
+      await waitFor(()=>!!win.WordIllustratorPanel,'Panel adapter initialization');await idle();
+      assert(doc.body.classList.contains('illustrator-panel'),'Compact panel layout is not active');
+      assert($('insertIllustratorButton').disabled,'A blank panel can insert an empty formula');
+      assert(win.getComputedStyle($('previewExpand')).display==='none','Unsupported expanded preview is exposed inside CEP');
+      assert($('formulaFontFamily').options.length===11,'Bundled font options disappeared in the panel');
+      assert($('importButton')&&$('exportButton')&&$('exportMdButton'),'Original conversion/export controls are missing');
+      await setFormula(fixture);await waitFor(()=>!$('insertIllustratorButton').disabled,'Valid formula enabling insertion');
+      assert($('illustratorStatus').textContent.includes('Synthetic document.ai'),'Connected document is not visible');
+    },true);
+    await test('Insert sends real SVG paths, selected typography, physical points, and the captured document target',async()=>{
+      input('formulaFontFamily','script');input('formulaFontSize',18);input('formulaColor','#146bce');await doc.fonts.ready;
+      const before=mock.insertions.length;$('insertIllustratorButton').click();
+      await waitFor(()=>mock.insertions.length>before,'Host insertion request');await idle();
+      const payload=mock.insertions.at(-1),svg=svgDocument(payload.svg);
+      assert(payload.latex===fixture&&payload.fontFamily==='script'&&payload.fontSizePt===18&&payload.color==='#146bce','Insertion lost the selected source or typography');
+      assert(payload.targetDocumentToken==='test-document-1'&&payload.targetArtboardIndex===2,'Insertion lost its captured document/artboard target');
+      const direct=await win.WordImageExport.svg(fixture,{fontFamily:'script',fontSizePt:18,color:'#146bce',background:'transparent',padding:0});
+      assert(Math.abs(payload.widthPt-direct.width*0.75)<0.001&&Math.abs(payload.heightPt-direct.height*0.75)<0.001,'Insertion payload does not preserve physical point size');
+      assert(glyphs(svg)===glyphs(svgDocument(await direct.blob.text())),'Insertion SVG did not use the selected font paths');
+      assert(svg.getAttribute('color')==='#146bce','Inserted vector lost its selected color');
+      assert($('illustratorStatus').textContent.includes('已插入矢量公式'),'Successful host insertion is not reported');
+      document.getElementById('fixturePayload').value=JSON.stringify(payload,null,2);
+    });
+    await test('TEX, Markdown, SVG, and PNG use native save dialogs with intact Base64 content',async()=>{
+      input('outputMode','dollars');
+      const tex=await save('exportButton','.tex'),markdown=await save('exportMdButton','.md');
+      assert(decodeText(tex).includes('$$\n'+fixture+'\n$$'),'Native TEX save changed selected delimiters or formula');
+      assert(decodeText(markdown)==='$$\n'+fixture+'\n$$\n','Native Markdown save changed equation content');
+      const svg=await save('exportSvgButton','.svg');svgDocument(decodeText(svg));
+      const png=await save('exportPngButton','.png'),bytes=decode(png);
+      assert([...bytes.slice(0,8)].join(',')==='137,80,78,71,13,10,26,10','Native PNG save corrupted binary bytes');
+      const image=await createImageBitmap(new Blob([bytes],{type:'image/png'}));
+      assert(image.width>20&&image.height>20,'Saved PNG cannot be decoded at its expected size');image.close();
+      for(const record of mock.dialogs.slice(-4))assert(record.defaultName&&record.types.length===1,'Native save dialog has no filename or type filter');
+      assert($('illustratorStatus').textContent.includes('已保存：'),'Native save completion is not reported');
+    });
+    await test('Canceling a save or rejecting a write never reports a successful saved file',async()=>{
+      const before=mock.writes.length;mock.cancelSave=true;$('exportButton').click();
+      await waitFor(()=>$('illustratorStatus').textContent.includes('已取消保存'),'Save cancellation status');await idle();
+      assert(mock.writes.length===before,'Canceling a dialog wrote a file');assert($('toast').textContent==='已取消保存。','Browser download toast hid the canceled native save');
+      mock.cancelSave=false;mock.writeError=6;$('exportSvgButton').click();
+      await waitFor(()=>$('illustratorStatus').textContent.includes('文件保存失败'),'Native write error');await idle();
+      assert(mock.writes.length===before,'Failed native write was treated as a saved file');
+      assert($('imageExportStatus').classList.contains('error')&&$('toast').textContent.includes('文件保存失败'),'SVG save error was replaced by a browser-download success message');
+      mock.writeError=0;await save('exportButton','.tex');
+    });
+    await test('Missing documents and host connection errors recover without inserting unintended artwork',async()=>{
+      const before=mock.insertions.length;mock.status.hasDocument=false;$('insertIllustratorButton').click();
+      await waitFor(()=>$('illustratorStatus').textContent.includes('新建或打开文档'),'Missing document guidance');await idle();
+      assert(mock.insertions.length===before,'Missing document still received an insertion request');
+      mock.status.hasDocument=true;mock.statusError='EvalScript error.';$('refreshIllustratorButton').click();
+      await waitFor(()=>$('illustratorStatus').classList.contains('error')&&$('insertIllustratorButton').disabled,'Host error disabling insertion');await idle();
+      assert(!$('refreshIllustratorButton').disabled,'Host error prevented retry');
+      mock.statusError=null;$('refreshIllustratorButton').click();await waitFor(()=>!$('insertIllustratorButton').disabled,'Host connection recovery');
+      mock.insertError='当前文档或画板已改变，请重新插入。';$('insertIllustratorButton').click();
+      await waitFor(()=>$('illustratorStatus').textContent.includes('已改变'),'Target change rejection');await idle();
+      assert(!$('insertIllustratorButton').disabled,'Rejected insertion left the panel stuck');
+    });
+    await test('A second click during insertion cannot duplicate artwork and edits do not change the captured formula',async()=>{
+      mock.holdInsert=true;const before=mock.insertions.length;
+      try{
+        $('insertIllustratorButton').click();await waitFor(()=>mock.pending.length===1,'Pending host insertion');
+        assert($('insertIllustratorButton').disabled,'Insert button remains enabled during host mutation');
+        await setFormula('XYZ');$('insertIllustratorButton').click();await pause(50);
+        assert(mock.insertions.length===before+1,'Second click created another insertion');
+        assert(mock.insertions.at(-1).latex===fixture,'Later edits changed the clicked formula snapshot');
+      }finally{mock.holdInsert=false;mock.pending.splice(0).forEach(finish=>finish());}
+      await idle();assert($('outputCode').value==='XYZ','Insertion completion replaced the latest editor contents');
+    });
+    await test('The built panel embeds its resources and blocks external navigation without network access',async()=>{
+      const policy=doc.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content||'';
+      assert(/connect-src\s+'none'/.test(policy),'Panel CSP permits network connections');
+      assert(/object-src\s+'none'/.test(policy),'Panel CSP permits embedded network objects');
+      assert(!doc.querySelector('script[src],link[rel="stylesheet"]'),'Panel references a sibling or remote rendering dependency');
+      assert((built.match(/data:font\/woff2;base64,/g)||[]).length===20,'Panel did not embed all 20 font files');
+      const link=doc.querySelector('a[href^="https:"]');
+      if(link){const current=win.location.href;link.click();assert(win.location.href===current,'Offline help link navigated away');assert($('illustratorStatus').textContent.includes('完全离线'),'Blocked external navigation gave no explanation');}
+      const network=win.performance.getEntriesByType('resource').filter(entry=>/^https?:/.test(entry.name));
+      assert(network.length===0,'Built panel requested an HTTP dependency: '+network.map(entry=>entry.name).join(', '));
+    });
+  }catch(error){panelResults.push({name:'Harness',pass:false,error:error.message});const li=document.createElement('li');li.className='fail';li.textContent='HARNESS ERROR: '+error.message;document.getElementById('results').append(li);}
+  document.getElementById('summary').textContent=panelResults.filter(result=>result.pass).length+' / '+panelResults.length+' passed — complete';
+  globalThis.panelComplete=true;
+})();
+</script>
+</html>
